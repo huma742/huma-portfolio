@@ -2,16 +2,16 @@
  * ============================================================================
  * PORTFOLIO SCRIPT: Zill-e-Huma Minhas
  * Features:
- *  1. Particle-network Canvas animation
- *  2. Interactive Python terminal with syntax-highlighted typing effect
- *  3. Count-up statistics on scroll reveal
- *  4. Scroll reveal animations via IntersectionObserver
- *  5. Project category filtering
- *  6. Certificate category filtering
- *  7. Fullscreen accessible Lightbox modal (keyboard & touch swipe support)
- *  8. Sticky navbar & responsive mobile drawer
- *  9. Email clipboard copy with toast feedback
- * 10. Contact form mailto generator & status handler
+ *  1. Interactive Python terminal with syntax-highlighted typing effect
+ *  2. Count-up statistics on scroll reveal
+ *  3. Scroll reveal animations via IntersectionObserver
+ *  4. Project 6-featured default with smooth "Show all 14" expansion & filtering
+ *  5. Certificate 6-featured default with smooth "View all 14" expansion & filtering
+ *  6. Fullscreen accessible Lightbox modal (keyboard & touch swipe support)
+ *  7. Sticky navbar & responsive mobile drawer
+ *  8. Email clipboard copy with toast feedback
+ *  9. Contact form mailto generator & status handler
+ * 10. Back to top smooth scroll
  * ============================================================================
  */
 
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close mobile menu when clicking nav links
-    navLinks.forEach(link => {
+    navLinks.forEach((link) => {
       link.addEventListener('click', () => {
         if (navMenu.classList.contains('open')) {
           navMenu.classList.remove('open');
@@ -86,12 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const sections = document.querySelectorAll('section[id]');
   const highlightActiveNav = () => {
     const scrollPos = window.scrollY + 120;
-    sections.forEach(section => {
+    sections.forEach((section) => {
       const top = section.offsetTop;
       const height = section.offsetHeight;
       const id = section.getAttribute('id');
       if (scrollPos >= top && scrollPos < top + height) {
-        navLinks.forEach(link => {
+        navLinks.forEach((link) => {
           link.classList.remove('active');
           if (link.getAttribute('href') === `#${id}`) {
             link.classList.add('active');
@@ -103,125 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', highlightActiveNav, { passive: true });
 
   // --------------------------------------------------------------------------
-  // 4. Subtle Particle Network Canvas
-  // --------------------------------------------------------------------------
-  const canvas = document.getElementById('particle-canvas');
-  if (canvas && !prefersReducedMotion) {
-    const ctx = canvas.getContext('2d');
-    let width = (canvas.width = canvas.parentElement.offsetWidth);
-    let height = (canvas.height = canvas.parentElement.offsetHeight);
-
-    const particles = [];
-    const particleCount = Math.min(Math.floor((width * height) / 14000), 55);
-    const maxDistance = 120;
-
-    const mouse = { x: null, y: null, maxDist: 140 };
-
-    class Particle {
-      constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.55;
-        this.vy = (Math.random() - 0.5) * 0.55;
-        this.radius = Math.random() * 1.8 + 1;
-        this.color = Math.random() > 0.4 ? 'rgba(124, 108, 255,' : 'rgba(61, 214, 198,';
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        if (this.x < 0 || this.x > width) this.vx *= -1;
-        if (this.y < 0 || this.y > height) this.vy *= -1;
-
-        // Subtle mouse repulsion/interactivity
-        if (mouse.x !== null && mouse.y !== null) {
-          const dx = mouse.x - this.x;
-          const dy = mouse.y - this.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < mouse.maxDist) {
-            const angle = Math.atan2(dy, dx);
-            this.x -= Math.cos(angle) * 0.6;
-            this.y -= Math.sin(angle) * 0.6;
-          }
-        }
-      }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `${this.color} 0.65)`;
-        ctx.fill();
-      }
-    }
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-
-    let isHeroVisible = true;
-    const heroObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          isHeroVisible = entry.isIntersecting;
-        });
-      },
-      { threshold: 0.1 }
-    );
-    heroObserver.observe(canvas.parentElement);
-
-    const animateParticles = () => {
-      if (isHeroVisible) {
-        ctx.clearRect(0, 0, width, height);
-
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].update();
-          particles[i].draw();
-
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < maxDistance) {
-              const alpha = (1 - dist / maxDistance) * 0.22;
-              ctx.beginPath();
-              ctx.strokeStyle = `rgba(124, 108, 255, ${alpha})`;
-              ctx.lineWidth = 1;
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.stroke();
-            }
-          }
-        }
-      }
-      requestAnimationFrame(animateParticles);
-    };
-
-    requestAnimationFrame(animateParticles);
-
-    // Track mouse position on hero
-    const heroSection = canvas.parentElement;
-    heroSection.addEventListener('mousemove', (e) => {
-      const rect = heroSection.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    });
-
-    heroSection.addEventListener('mouseleave', () => {
-      mouse.x = null;
-      mouse.y = null;
-    });
-
-    // Resize handler
-    window.addEventListener('resize', () => {
-      width = canvas.width = canvas.parentElement.offsetWidth;
-      height = canvas.height = canvas.parentElement.offsetHeight;
-    });
-  }
-
-  // --------------------------------------------------------------------------
-  // 5. Interactive Python Terminal Card (Typewriter Effect)
+  // 4. Interactive Python Terminal Card (Typewriter Effect)
   // --------------------------------------------------------------------------
   const typewriterCode = document.getElementById('typewriter-code');
   const lineNumbersEl = document.getElementById('terminal-line-numbers');
@@ -261,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lineNumbersEl.innerHTML = '';
 
     if (prefersReducedMotion) {
-      // If user prefers reduced motion, render all lines instantly
       codeLines.forEach((line, index) => {
         const lineNum = document.createElement('div');
         lineNum.textContent = index + 1;
@@ -275,12 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderNextLine = () => {
       if (lineIndex < codeLines.length) {
-        // Append line number
         const numDiv = document.createElement('div');
         numDiv.textContent = lineIndex + 1;
         lineNumbersEl.appendChild(numDiv);
 
-        // Append line HTML
         const lineContent = codeLines[lineIndex].html;
         if (lineIndex === 0) {
           typewriterCode.innerHTML = lineContent;
@@ -289,9 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         lineIndex++;
-
-        // Calculate dynamic typing delay for realistic rhythm
-        const delay = lineContent === '' ? 50 : Math.floor(Math.random() * 40) + 60;
+        const delay = lineContent === '' ? 45 : Math.floor(Math.random() * 35) + 55;
         typingTimer = setTimeout(renderNextLine, delay);
       }
     };
@@ -299,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderNextLine();
   };
 
-  // Run typing animation
   runTerminalTyping();
 
   if (replayBtn) {
@@ -309,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 6. Animated Count-up Statistics
+  // 5. Animated Count-up Statistics
   // --------------------------------------------------------------------------
   const statNumbers = document.querySelectorAll('.stat-number');
   let statsCounted = false;
@@ -321,14 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
     statNumbers.forEach((el) => {
       const target = parseFloat(el.getAttribute('data-target'));
       const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
-      const duration = 1600; // ms
+      const duration = 1500; // ms
       const startTime = performance.now();
 
       const updateCount = (currentTime) => {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-
-        // Ease-out expo curve for smooth landing
         const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
         const currentVal = target * easeProgress;
 
@@ -362,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 7. Scroll Reveal Animation for Sections & Cards
+  // 6. Scroll Reveal Animation for Sections & Cards
   // --------------------------------------------------------------------------
   const revealElements = document.querySelectorAll('.reveal-on-scroll');
   if ('IntersectionObserver' in window) {
@@ -375,23 +249,94 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
     );
 
     revealElements.forEach((el) => {
       revealObserver.observe(el);
     });
   } else {
-    // Fallback if IntersectionObserver not supported
     revealElements.forEach((el) => el.classList.add('is-visible'));
   }
 
   // --------------------------------------------------------------------------
-  // 8. Project Category Filtering
+  // 7. Projects: 6 Featured Default + Expand "Show all 14" + Category Filters
   // --------------------------------------------------------------------------
+  const projectCards = Array.from(document.querySelectorAll('.project-card'));
   const projectFilterBtns = document.querySelectorAll('.projects-section .filter-btn');
-  const projectCards = document.querySelectorAll('.project-card');
+  const projectsToggleBtn = document.getElementById('projects-toggle-btn');
+  const projectsToggleWrapper = document.querySelector('.projects-toggle-wrapper');
 
+  let isProjectsExpanded = false;
+  let currentProjectFilter = 'all';
+
+  const updateProjectsVisibility = () => {
+    projectCards.forEach((card, index) => {
+      const cardCategory = card.getAttribute('data-category') || '';
+      const matchesFilter =
+        currentProjectFilter === 'all' || cardCategory.includes(currentProjectFilter);
+
+      if (currentProjectFilter === 'all') {
+        // In "All" mode: show first 6 if collapsed, show all 14 if expanded
+        if (index < 6 || isProjectsExpanded) {
+          card.classList.remove('is-collapsed');
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else {
+          card.classList.add('is-collapsed');
+          card.style.display = 'none';
+        }
+      } else {
+        // When filtered by specific category: filter across all 14 projects
+        if (matchesFilter) {
+          card.classList.remove('is-collapsed');
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else {
+          card.classList.add('is-collapsed');
+          card.style.display = 'none';
+        }
+      }
+    });
+
+    // Update toggle button text and visibility
+    if (projectsToggleWrapper && projectsToggleBtn) {
+      if (currentProjectFilter === 'all') {
+        projectsToggleWrapper.style.display = 'flex';
+        const toggleText = projectsToggleBtn.querySelector('.toggle-text');
+        if (toggleText) {
+          toggleText.textContent = isProjectsExpanded ? 'Show less' : 'Show all 14 projects';
+        }
+        projectsToggleBtn.setAttribute('aria-expanded', isProjectsExpanded ? 'true' : 'false');
+        if (isProjectsExpanded) {
+          projectsToggleBtn.classList.add('toggle-expanded');
+        } else {
+          projectsToggleBtn.classList.remove('toggle-expanded');
+        }
+      } else {
+        // Hide toggle when a specific category filter is active
+        projectsToggleWrapper.style.display = 'none';
+      }
+    }
+  };
+
+  // Toggle button click listener
+  if (projectsToggleBtn) {
+    projectsToggleBtn.addEventListener('click', () => {
+      isProjectsExpanded = !isProjectsExpanded;
+      updateProjectsVisibility();
+
+      if (!isProjectsExpanded) {
+        // Smooth scroll back to projects section if user collapses from bottom
+        const projectsSec = document.getElementById('projects');
+        if (projectsSec) {
+          projectsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  }
+
+  // Category filter click listeners
   projectFilterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       projectFilterBtns.forEach((b) => {
@@ -401,34 +346,90 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
 
-      const filterValue = btn.getAttribute('data-filter');
-
-      projectCards.forEach((card) => {
-        const cardCategory = card.getAttribute('data-category') || '';
-        const shouldShow =
-          filterValue === 'all' || cardCategory.includes(filterValue);
-
-        if (shouldShow) {
-          card.style.display = 'flex';
-          setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-          }, 20);
-        } else {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(10px)';
-          card.style.display = 'none';
-        }
-      });
+      currentProjectFilter = btn.getAttribute('data-filter') || 'all';
+      updateProjectsVisibility();
     });
   });
 
-  // --------------------------------------------------------------------------
-  // 9. Certificate Category Filtering
-  // --------------------------------------------------------------------------
-  const certFilterBtns = document.querySelectorAll('.certificates-section .filter-btn');
-  const certCards = document.querySelectorAll('.cert-card');
+  // Initial projects render
+  updateProjectsVisibility();
 
+  // --------------------------------------------------------------------------
+  // 8. Certificates: 6 Default + Expand "View all 14" + Category Filters
+  // --------------------------------------------------------------------------
+  const certCards = Array.from(document.querySelectorAll('.cert-card'));
+  const certFilterBtns = document.querySelectorAll('.certificates-section .filter-btn');
+  const certsToggleBtn = document.getElementById('certs-toggle-btn');
+  const certsToggleWrapper = document.querySelector('.certs-toggle-wrapper');
+
+  let isCertsExpanded = false;
+  let currentCertFilter = 'all';
+
+  const updateCertsVisibility = () => {
+    certCards.forEach((card, index) => {
+      const cardCategory = card.getAttribute('data-category') || '';
+      const matchesFilter =
+        currentCertFilter === 'all' || cardCategory.includes(currentCertFilter);
+
+      if (currentCertFilter === 'all') {
+        // In "All" mode: show first 6 if collapsed, show all 14 if expanded
+        if (index < 6 || isCertsExpanded) {
+          card.classList.remove('is-collapsed');
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else {
+          card.classList.add('is-collapsed');
+          card.style.display = 'none';
+        }
+      } else {
+        // When filtered: filter across all 14 certificates
+        if (matchesFilter) {
+          card.classList.remove('is-collapsed');
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else {
+          card.classList.add('is-collapsed');
+          card.style.display = 'none';
+        }
+      }
+    });
+
+    // Update toggle button text and visibility
+    if (certsToggleWrapper && certsToggleBtn) {
+      if (currentCertFilter === 'all') {
+        certsToggleWrapper.style.display = 'flex';
+        const toggleText = certsToggleBtn.querySelector('.toggle-text');
+        if (toggleText) {
+          toggleText.textContent = isCertsExpanded ? 'Show less' : 'View all 14';
+        }
+        certsToggleBtn.setAttribute('aria-expanded', isCertsExpanded ? 'true' : 'false');
+        if (isCertsExpanded) {
+          certsToggleBtn.classList.add('toggle-expanded');
+        } else {
+          certsToggleBtn.classList.remove('toggle-expanded');
+        }
+      } else {
+        certsToggleWrapper.style.display = 'none';
+      }
+    }
+  };
+
+  // Toggle button click listener
+  if (certsToggleBtn) {
+    certsToggleBtn.addEventListener('click', () => {
+      isCertsExpanded = !isCertsExpanded;
+      updateCertsVisibility();
+
+      if (!isCertsExpanded) {
+        const certsSec = document.getElementById('certificates');
+        if (certsSec) {
+          certsSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  }
+
+  // Certificate filter click listeners
   certFilterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       certFilterBtns.forEach((b) => {
@@ -438,30 +439,16 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
 
-      const filterValue = btn.getAttribute('data-filter');
-
-      certCards.forEach((card) => {
-        const cardCategory = card.getAttribute('data-category') || '';
-        const shouldShow =
-          filterValue === 'all' || cardCategory.includes(filterValue);
-
-        if (shouldShow) {
-          card.style.display = 'flex';
-          setTimeout(() => {
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-          }, 20);
-        } else {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(10px)';
-          card.style.display = 'none';
-        }
-      });
+      currentCertFilter = btn.getAttribute('data-filter') || 'all';
+      updateCertsVisibility();
     });
   });
 
+  // Initial certificates render
+  updateCertsVisibility();
+
   // --------------------------------------------------------------------------
-  // 10. Fullscreen Certificate Lightbox Modal
+  // 9. Fullscreen Certificate Lightbox Modal
   // --------------------------------------------------------------------------
   const lightboxModal = document.getElementById('lightbox-modal');
   const lightboxBackdrop = document.getElementById('lightbox-backdrop');
@@ -473,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lightboxCategory = document.getElementById('lightbox-category');
   const lightboxCounter = document.getElementById('lightbox-counter');
 
-  // Collect certificate dataset from DOM
+  // Collect full certificate dataset from DOM
   const certificateData = [];
   certCards.forEach((card, index) => {
     const fgImg = card.querySelector('.cert-fg-img');
@@ -491,7 +478,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     certificateData.push(item);
 
-    // Click handler to open lightbox
     if (frame) {
       frame.addEventListener('click', () => openLightbox(index));
       frame.addEventListener('keydown', (e) => {
@@ -516,9 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
-    // Focus close button for keyboard accessibility
     setTimeout(() => {
-      lightboxClose.focus();
+      if (lightboxClose) lightboxClose.focus();
     }, 50);
   };
 
@@ -542,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxCategory.textContent = cert.category;
     lightboxCounter.textContent = `${currentCertIndex + 1} / ${certificateData.length}`;
 
-    // Preload next and previous images for instant switching
+    // Preload neighbors
     const nextIdx = (currentCertIndex + 1) % certificateData.length;
     const prevIdx = (currentCertIndex - 1 + certificateData.length) % certificateData.length;
     new Image().src = certificateData[nextIdx].src;
@@ -564,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lightboxNext) lightboxNext.addEventListener('click', showNextCert);
   if (lightboxPrev) lightboxPrev.addEventListener('click', showPrevCert);
 
-  // Keyboard navigation for Lightbox (Esc, Left Arrow, Right Arrow)
+  // Keyboard navigation for Lightbox
   document.addEventListener('keydown', (e) => {
     if (!lightboxModal.classList.contains('active')) return;
 
@@ -584,28 +569,34 @@ document.addEventListener('DOMContentLoaded', () => {
   let touchStartX = 0;
   let touchEndX = 0;
 
-  lightboxModal.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true });
+  lightboxModal.addEventListener(
+    'touchstart',
+    (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    },
+    { passive: true }
+  );
 
-  lightboxModal.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipeGesture();
-  }, { passive: true });
+  lightboxModal.addEventListener(
+    'touchend',
+    (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipeGesture();
+    },
+    { passive: true }
+  );
 
   const handleSwipeGesture = () => {
-    const threshold = 45;
+    const threshold = 40;
     if (touchEndX < touchStartX - threshold) {
-      // Swiped left -> next
       showNextCert();
     } else if (touchEndX > touchStartX + threshold) {
-      // Swiped right -> prev
       showPrevCert();
     }
   };
 
   // --------------------------------------------------------------------------
-  // 11. Copy Email to Clipboard & Toast Notification
+  // 10. Copy Email to Clipboard & Toast Notification
   // --------------------------------------------------------------------------
   const copyEmailBtn = document.getElementById('copy-email-btn');
   const toastNotification = document.getElementById('toast-notification');
@@ -623,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     toastTimer = setTimeout(() => {
       toastNotification.classList.remove('show');
       toastNotification.setAttribute('aria-hidden', 'true');
-    }, 2800);
+    }, 2500);
   };
 
   if (copyEmailBtn) {
@@ -633,7 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(email);
         } else {
-          // Fallback textarea copy method
           const textArea = document.createElement('textarea');
           textArea.value = email;
           textArea.style.position = 'fixed';
@@ -651,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
           if (copyTextEl) copyTextEl.textContent = 'Copy';
-        }, 2200);
+        }, 2000);
       } catch (err) {
         showToast('humaminhas14314@gmail.com');
       }
@@ -659,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 12. Contact Form Handler (Client validation & Mailto fallback)
+  // 11. Contact Form Handler (Mailto format generator)
   // --------------------------------------------------------------------------
   const contactForm = document.getElementById('contact-form');
   const formStatus = document.getElementById('form-status');
@@ -681,7 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Generate mailto link
       const mailtoBody = encodeURIComponent(
         `Hello Zill-e-Huma,\n\nMy name is ${name} (${email}).\n\n${message}`
       );
@@ -694,10 +683,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formStatus.className = 'form-status success';
       }
 
-      // Open user's email client
       window.location.href = mailtoUrl;
 
-      // Reset form after short delay
       setTimeout(() => {
         contactForm.reset();
         if (formStatus) {
@@ -708,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // 13. Back to Top Smooth Scroll
+  // 12. Back to Top Smooth Scroll
   // --------------------------------------------------------------------------
   const backToTopBtn = document.getElementById('back-to-top');
   if (backToTopBtn) {
